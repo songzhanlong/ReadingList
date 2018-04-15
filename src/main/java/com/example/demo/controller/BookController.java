@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dao.BookRepository;
+import com.example.demo.domain.AmazonProperties;
 import com.example.demo.domain.Book;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,12 @@ import java.util.List;
 @RequestMapping("/")
 public class BookController {
     private BookRepository bookRepository;
+    AmazonProperties amazonProperties;
+
+    @Autowired
+    public void setAmazonProperties(AmazonProperties amazonProperties) {
+        this.amazonProperties = amazonProperties;
+    }
 
     @Autowired
     public void setBookRepository(BookRepository bookRepository) {
@@ -32,6 +39,8 @@ public class BookController {
                 bookRepository.findByReader(reader);
         if (readingList != null) {
             model.addAttribute("books", readingList);
+            model.addAttribute("reader", reader);
+            model.addAttribute("amazonID", amazonProperties.getAssociateId());
         }
         return "bookList";
     }
