@@ -8,12 +8,14 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -27,7 +29,7 @@ public class MockMvcWebTests {
 
     @Before
     public void setupMockMvc() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webContext).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(webContext).apply(springSecurity()).build();
     }
 
     @Test
@@ -57,5 +59,16 @@ public class MockMvcWebTests {
                 .andExpect(model().attribute("books", hasSize(1)))
                 .andExpect(model().attribute("books", contains(samePropertyValuesAs(expectedBook))));
 
+    }
+
+    @Test
+    @WithMockUser(username = "craig",
+            password = "password",
+            roles = "READER")
+    public void homePage_unauthenticatedUser() throws Exception {
+        mockMvc.perform(get("http://localhost:8080"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(header().string("Location",
+                        "http://localhost:8080/login"));
     }
 }
