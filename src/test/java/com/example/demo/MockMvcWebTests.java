@@ -1,6 +1,8 @@
 package com.example.demo;
 
+import com.example.demo.dao.ReaderRepository;
 import com.example.demo.domain.Book;
+import com.example.demo.domain.Reader;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -26,6 +29,8 @@ public class MockMvcWebTests {
     @Autowired
     private WebApplicationContext webContext;
     private MockMvc mockMvc;
+    @Autowired
+    private ReaderRepository readerRepository;
 
     @Before
     public void setupMockMvc() {
@@ -70,5 +75,20 @@ public class MockMvcWebTests {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location",
                         "http://localhost:8080/login"));
+    }
+
+    @Test
+    @WithUserDetails("craig")
+    public void homePage_authenticatedUser() throws Exception {
+        Reader expectedReader = new Reader();
+        expectedReader.setUsername("craig");
+        expectedReader.setPassword("password");
+        expectedReader.setFullname("Craig Walls");
+        readerRepository.save(expectedReader);
+        mockMvc.perform(get("/craig"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("readingList"))
+                .andExpect(model().attribute("reader",
+                        samePropertyValuesAs(expectedReader))).andExpect(model().attribute("books", hasSize(0)));
     }
 }
