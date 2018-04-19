@@ -12,10 +12,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.thoughtworks.selenium.SeleneseTestNgHelper.assertEquals;
+import static org.junit.Assert.assertEquals;
+
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = ReadingListApplication.class,webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ServerWebTests {
 
     private static FirefoxDriver browser;
@@ -26,17 +27,28 @@ public class ServerWebTests {
     public static void openBrowser() {
         browser = new FirefoxDriver();
         browser.manage().timeouts()
-                .implicitlyWait(10, TimeUnit.SECONDS);
+                .implicitlyWait(3, TimeUnit.SECONDS);
     }
 
     @AfterClass
     public static void closeBrowser() {
-        browser.quit();
+//        browser.quit();
     }
 
     @Test
     public void addBookToEmptyList() {
-        String baseUrl = "http://localhost:8080/TOM";
+        String baseUrl = "http://localhost:"+port+"/tom";
+        addBook(baseUrl);
+//        addBook(baseUrl);
+//        addBook(baseUrl);
+        WebElement dl = browser.findElementByCssSelector(".bookHeadline");
+        assertEquals("BOOK TITLE by BOOK AUTHOR (ISBN: 1234567890)",
+                dl.getText());
+        WebElement dt = browser.findElementByCssSelector(".bookDescription");
+        assertEquals("DESCRIPTION", dt.getText());
+    }
+
+    private void addBook(String baseUrl) {
         browser.get(baseUrl);
         assertEquals("You have no books in your book list",
                 browser.findElementByTagName("div").getText());
@@ -50,10 +62,5 @@ public class ServerWebTests {
                 .sendKeys("DESCRIPTION");
         browser.findElementByTagName("form")
                 .submit();
-        WebElement dl = browser.findElementByCssSelector("dt.bookHeadline");
-        assertEquals("BOOK TITLE by BOOK AUTHOR (ISBN: 1234567890)",
-                dl.getText());
-        WebElement dt = browser.findElementByCssSelector("dd.bookDescription");
-        assertEquals("DESCRIPTION", dt.getText());
     }
 }

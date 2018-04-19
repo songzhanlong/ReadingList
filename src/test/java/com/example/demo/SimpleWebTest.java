@@ -3,6 +3,7 @@ package com.example.demo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.HttpClientErrorException;
@@ -12,9 +13,7 @@ import static org.assertj.core.api.Fail.fail;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(
-        classes = ReadingListApplication.class)
-@WebIntegrationTest(randomPort = true)
+@SpringBootTest(classes = ReadingListApplication.class,webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class SimpleWebTest {
     @Value("${local.server.port}")
     private int port;
